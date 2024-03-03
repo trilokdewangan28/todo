@@ -10,6 +10,7 @@ class TaskController extends GetxController{
   }
   
   var taskList = <Task>[].obs;
+  var particularTaskList = <Task>[].obs;
   
   //==================================ADDING THE TASK TO DATABASE
   Future<int> addTask({Task? task})async{
@@ -19,8 +20,15 @@ class TaskController extends GetxController{
   //=================================GET THE TASK LIST FROM DATABASE
   void getTasks()async{
     List<Map<String,dynamic>> task = await DBHelper.getData();
-    taskList.assignAll(task.map((data) => new Task.fromJson(data)).toList());
-    print(taskList.toString());
+    taskList.assignAll(task.map((data) =>  Task.fromJson(data)).toList());
+   // print(taskList.toString());
+  }
+
+  //=================================GET THE TASK LIST FROM DATABASE
+  Future getTasksById(int id)async{
+    List<Map<String,dynamic>> task = await DBHelper.getDataById(id);
+    particularTaskList.assignAll(task.map((data) =>  Task.fromJson(data)).toList());
+   // print(particularTaskList.toString());
   }
 
   //=================================GET THE TASK LIST FROM DATABASE

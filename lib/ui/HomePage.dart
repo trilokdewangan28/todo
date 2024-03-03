@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:todo/controllers/task_controller.dart';
 import 'package:todo/models/task.dart';
 import 'package:todo/services/NotificationCreationMethod.dart';
-import 'package:todo/services/NotificationServices.dart';
+
 import 'package:todo/services/ThemeServices.dart';
 import 'package:todo/ui/AddTaskPage.dart';
 import 'package:todo/ui/Themes.dart';
@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   var notifyHelper;
   final _taskController = Get.put(TaskController());
   DateTime _selectedDate = DateTime.now();
+  bool _isAllSelect = false;
 
   @override
   void initState() {
@@ -41,8 +42,9 @@ class _HomePageState extends State<HomePage> {
         body: Column(
           children: [
             _addTaskBar(),
+            _allDateBtn(),
             _addDateBar(),
-            SizedBox(height: 10,),
+            const SizedBox(height: 10,),
             _showTask()
           ],
         ));
@@ -58,34 +60,9 @@ class _HomePageState extends State<HomePage> {
                   itemCount: _taskController.taskList.length,
                   itemBuilder: (context,index){
                     Task task = _taskController.taskList[index];
-                    //print(task.toJson());
-                    if(task.repeat=="Daily"){
-                      DateTime date = DateFormat.jm().parse(task.startTime.toString());
-                      var myTime = DateFormat("HH:mm a").format(date);
-                      int hour = int.parse(myTime.toString().split(":")[0]); // 12
-                      int minute = int.parse(myTime.toString().split(":")[1].split(" ")[0]); //
-                      String amPm = myTime.toString().split(":")[1].split(" ")[1];
-                      int? playHour;
-                      int? playMinute;
-                      if(minute>task.remind!){
-                        //15:25 =>(minute-remind)25-5= minute 20
-                        playHour = hour;
-                        playMinute = minute-task.remind!;
-                      }else{
-                        //15:03 => (hour-1)15-1=hour 14 && (remind-minute)=2 && (60-2)
-                        playHour = hour-1;
-                        int minusMinute = task.remind! - minute;
-                        playMinute = minusMinute!=0 ? 60-minusMinute : 0;
-                      }
-                      print('notification time is $playHour : $playMinute');
-                      NotificationCreationMethod.raiseScheduledNotificationDateAndTime(
-                          task: task,
-                          minute:playMinute ,
-                          hour:playHour,
-                        isRepeat: true
-                      );
-                      //1.41
-                      return AnimationConfiguration.staggeredList(
+                    if(_isAllSelect!=true){
+                      if(task.repeat=="Daily"){
+                        return AnimationConfiguration.staggeredList(
                             position: index,
                             child: SlideAnimation(
                               horizontalOffset: 100.0,
@@ -103,8 +80,30 @@ class _HomePageState extends State<HomePage> {
                               ),
                             )
                         );
-                    }
-                    if(task.date==DateFormat.yMd().format(_selectedDate)){
+                      }
+                      if(task.date==DateFormat.yMd().format(_selectedDate)){
+                        return AnimationConfiguration.staggeredList(
+                            position: index,
+                            child: SlideAnimation(
+                              horizontalOffset: 100.0,
+                              child: FadeInAnimation(
+                                child: Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: (){
+                                        _showBottomSheet(context,task);
+                                      },
+                                      child: TaskTile(task),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            )
+                        );
+                      }else{
+                        return Container();
+                      }
+                    }else{
                       return AnimationConfiguration.staggeredList(
                           position: index,
                           child: SlideAnimation(
@@ -123,8 +122,6 @@ class _HomePageState extends State<HomePage> {
                             ),
                           )
                       );
-                    }else{
-                      return Container();
                     }
                   }
               );
@@ -138,7 +135,7 @@ class _HomePageState extends State<HomePage> {
     return Get.bottomSheet(
         Container(
           width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.only(top: 4),
+          padding: const EdgeInsets.only(top: 4),
           height: task.isCompleted==1 ? MediaQuery.of(context).size.height*0.24 : MediaQuery.of(context).size.height*0.32,
           color: Get.isDarkMode? darkGreyClr : Colors.white ,
           child: Column(
@@ -151,7 +148,7 @@ class _HomePageState extends State<HomePage> {
                   color: Get.isDarkMode ? Colors.grey[600] : Colors.grey[300]
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               task.isCompleted==1 
                   ? Container()
                   :_bottomSheetButton(
@@ -172,7 +169,7 @@ class _HomePageState extends State<HomePage> {
                   clr: Colors.red[400]!,
                   context: context
               ),
-              SizedBox(height: 20,),
+              const SizedBox(height: 20,),
               _bottomSheetButton(
                   label: "Close",
                   onTap: (){
@@ -183,7 +180,7 @@ class _HomePageState extends State<HomePage> {
                   context: context,
                 
               ),
-              SizedBox(height: 10,)
+              const SizedBox(height: 10,)
             ],
           ),
         )
@@ -201,7 +198,7 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 4),
+        margin: const EdgeInsets.symmetric(vertical: 4),
         height: 55,
         width: MediaQuery.of(context).size.width*0.9,
         decoration: BoxDecoration(
@@ -225,7 +222,7 @@ class _HomePageState extends State<HomePage> {
   //======================================ADD DATE BAR
   _addDateBar(){
     return Container(
-        margin: EdgeInsets.only(top: 20, left: 20),
+        margin: const EdgeInsets.only(top: 20, left: 20),
         child: DatePicker(
           DateTime.now(),
           height: 100,
@@ -261,7 +258,7 @@ class _HomePageState extends State<HomePage> {
   //=====================================RETURNING ADD TASK BAR
   _addTaskBar() {
     return Container(
-      margin: EdgeInsets.only(left: 20, right: 20, top: 10),
+      margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -281,10 +278,39 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           MyButton(label: "+ Add Task", onTap:()async{
-           await Get.to(AddTaskPage());
+           await Get.to(const AddTaskPage());
            _taskController.getTasks();
           })
         ],
+      ),
+    );
+  }
+  
+  //====================================ALL DATE BUTTON
+  _allDateBtn(){
+    return GestureDetector(
+      onTap: (){
+        setState(() {
+          _isAllSelect= !_isAllSelect;
+        });
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        height: 50,
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+            color: _isAllSelect ? primaryColor : Get.isDarkMode? darkGreyClr : Colors.grey[300],
+            borderRadius: BorderRadius.circular(15),
+            border: _isAllSelect ? null :Border.all(
+                color: Colors.grey
+            )
+        ),
+        child: Center(
+          child: Text(
+            'All Date Task',
+            style: titleStyle,
+          ),
+        ),
       ),
     );
   }
@@ -310,8 +336,8 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: context.theme.backgroundColor,
       actions: [
         Container(
-          margin: EdgeInsets.only(right: 15),
-          child: CircleAvatar(
+          margin: const EdgeInsets.only(right: 15),
+          child: const CircleAvatar(
             backgroundImage: AssetImage('assets/images/profile.jpg'),
           ),
         )

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:todo/ui/Themes.dart';
 class NotifyPage extends StatelessWidget {
   final  task_info;
   const NotifyPage({super.key, required this.task_info});
@@ -13,7 +14,7 @@ class NotifyPage extends StatelessWidget {
           onPressed: (){
             Get.back();
           },
-          icon: Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back_ios),
           color: Get.isDarkMode? Colors.white :Colors.grey,
         ),
         title: Text(task_info['task_title']),
@@ -24,16 +25,41 @@ class NotifyPage extends StatelessWidget {
           width: 300,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-            color: Get.isDarkMode?Colors.white:Colors.grey[400]
+            color: Get.isDarkMode?primaryColor:primaryColor
           ),
-          child: Center(
-            child: Text(
-              task_info['task_note'],
-              style: TextStyle(
-                  color: Get.isDarkMode ? Colors.black : Colors.white,
-                fontSize: 30
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                task_info['task_note'],
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 30
+                ),
               ),
-            ),
+              Text(
+                '${task_info['task_startTime']} - ${task_info['task_endTime']}',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20
+                ),
+              ),
+              Text(
+                task_info['task_repeat'],
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20
+                ),
+              ),
+              Text(
+                task_info['task_date'],
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20
+                ),
+              ),
+            ],
           )
         ),
       )

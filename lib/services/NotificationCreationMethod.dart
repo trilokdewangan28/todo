@@ -2,6 +2,11 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 
 import '../models/task.dart';
 
+class UniqueNotificationButtonKey{
+  static String themeChanged = 'theme_changed';
+  static String viewTask = 'view_task';
+}
+
 class NotificationCreationMethod{
   //==========================================RAISING A SIMPLE NOTIFICATION
   static Future<void> raiseSimpleNotification({required String? title, required String? body})async{
@@ -12,17 +17,19 @@ class NotificationCreationMethod{
         title: title,
         body: body,
       ),
-      actionButtons: [
-        NotificationActionButton(
-          key: 'theme_changed',
-          label: 'theme changed',
-        ),
-      ],
     );
   }
   
   //==========================================RAISING A SCHEDULED ACCORDING TO DATE AND TIME NOTIFICATION
-  static Future<void> raiseScheduledNotificationDateAndTime({required Task task , int? hour, int? minute, bool isRepeat=false})async{
+  static Future<void> raiseScheduledNotification({
+    required Task task , 
+    int? hour, 
+    int? minute, 
+    int? day, 
+    int? month,
+    int? year,
+    int? weekDay,
+    bool isRepeat=false})async{
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
           id: task.id!,
@@ -33,18 +40,27 @@ class NotificationCreationMethod{
             'page_title':'Your Task',
             'task_id':task.id.toString(),
             'task_title':task.title,
-            'task_note':task.note
+            'task_note':task.note,
+            'task_startTime':task.startTime,
+            'task_endTime':task.endTime,
+            'task_repeat':task.repeat,
+            'task_date':task.date
           }
       ),
       schedule: NotificationCalendar(
         hour: hour,
         minute: minute,
+        weekday: weekDay,
+        day: day,
+        month: month,
+        year: year,
+        preciseAlarm: true,
         repeats: isRepeat,
         timeZone: await AwesomeNotifications().getLocalTimeZoneIdentifier(),
       ),
       actionButtons: [
         NotificationActionButton(
-          key: 'view_task',
+          key: UniqueNotificationButtonKey.viewTask,
           label: 'View Task',
         ),
       ],
@@ -52,7 +68,7 @@ class NotificationCreationMethod{
   }
   
   //==========================================RAISING A SCHEDULED NOTIFICATION
-  static Future<void> raiseScheduledNotification({required String? title, required String? body})async{
+  static Future<void> raiseScheduledNotificationInterval({required String? title, required String? body})async{
     await AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: 1,

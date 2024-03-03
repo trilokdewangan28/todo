@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'package:intl/intl.dart';
 import 'package:todo/controllers/task_controller.dart';
-import 'package:todo/db/db_helper.dart';
+
 import 'package:todo/models/task.dart';
-import 'package:todo/services/NotificationServices.dart';
-import 'package:todo/services/ThemeServices.dart';
+import 'package:todo/services/NotificationCreationMethod.dart';
+
 import 'package:todo/ui/Themes.dart';
 import 'package:todo/ui/widgets/button.dart';
 import 'package:todo/ui/widgets/input_field.dart';
@@ -30,6 +31,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
   String _selectedRepeat = "None";
   List<String> repeatList = ['None','Daily','Weekly','Monthly'];
   
+  String _selectedWantReminder = "No";
+  List<String> wantReminder = ['No','Yes'];
+  
   int _selectedColorIndex = 0;
   
   @override
@@ -38,7 +42,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       backgroundColor:context.theme.backgroundColor,
       appBar: _appBar(),
       body: Container(
-        padding: EdgeInsets.only(left: 20,right: 20),
+        padding: const EdgeInsets.only(left: 20,right: 20),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +67,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   onPressed: (){
                     _getDateFromUser();
                   },
-                  icon: Icon(Icons.calendar_today_outlined,color: Colors.grey,),
+                  icon: const Icon(Icons.calendar_today_outlined,color: Colors.grey,),
                 ),
               ),
               
@@ -78,11 +82,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
                           onPressed: (){
                             _getTimeFromUser(isStartTime: true);
                           },
-                          icon: Icon(Icons.access_time_rounded,color: Colors.grey,),
+                          icon: const Icon(Icons.access_time_rounded,color: Colors.grey,),
                         ),
                       )
                   ),
-                  SizedBox(width: 12,),
+                  const SizedBox(width: 12,),
                   Expanded(
                       child: MyInputField(
                         title: "End Time",
@@ -91,15 +95,41 @@ class _AddTaskPageState extends State<AddTaskPage> {
                           onPressed: (){
                             _getTimeFromUser(isStartTime: false);
                           },
-                          icon: Icon(Icons.access_time_rounded,color: Colors.grey,),
+                          icon: const Icon(Icons.access_time_rounded,color: Colors.grey,),
                         ),
                       )
                   )
                 ],
               ),
+
+              //=====================================WANT NOTIFICATION SELECTOR
+              MyInputField(
+                  title: 'Do you want notification',
+                  hint: _selectedWantReminder,
+                  widget: DropdownButton(
+                    //value: _selectedRemind.toString(),
+                    onChanged: (value){
+                      setState(() {
+                        _selectedWantReminder =value!;
+                      });
+                    },
+                    icon: const Icon(Icons.keyboard_arrow_down,color: Colors.grey,),
+                    iconSize: 32,
+                    elevation: 4,
+                    underline: Container(),
+                    style: subTitleStyle,
+                    items: wantReminder.map<DropdownMenuItem<String>>((String value){
+                      return DropdownMenuItem<String>(
+                          value: value.toString(),
+                          child: Text(value.toString())
+                      );
+                    }).toList(),
+                  )
+              ),
               
               //=====================================REMIND SELECTOR
-              MyInputField(
+             _selectedWantReminder=="Yes" 
+                 ? MyInputField(
                 title: 'Remind',
                 hint: "$_selectedRemind Minute Early",
                 widget: DropdownButton(
@@ -109,7 +139,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                       _selectedRemind = int.parse(value!);
                     });
                   },
-                  icon: Icon(Icons.keyboard_arrow_down,color: Colors.grey,),
+                  icon: const Icon(Icons.keyboard_arrow_down,color: Colors.grey,),
                   iconSize: 32,
                   elevation: 4,
                   underline: Container(),
@@ -121,12 +151,14 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     );
                   }).toList(),
                 )
-              ),
+              ) 
+                 : Container(),
               
               //=====================================REPEAT SELECTOR
-              MyInputField(
+              _selectedWantReminder=="Yes" 
+                  ? MyInputField(
                   title: 'Repeat',
-                  hint: "$_selectedRepeat",
+                  hint: _selectedRepeat,
                   widget: DropdownButton(
                     //value: _selectedRemind.toString(),
                     onChanged: (value){
@@ -134,7 +166,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         _selectedRepeat = value!;
                       });
                     },
-                    icon: Icon(Icons.keyboard_arrow_down,color: Colors.grey,),
+                    icon: const Icon(Icons.keyboard_arrow_down,color: Colors.grey,),
                     iconSize: 32,
                     elevation: 4,
                     underline: Container(),
@@ -146,8 +178,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
                       );
                     }).toList(),
                   )
-              ),
-              SizedBox(height: 18,),
+              ) 
+                  : Container(),
+              const SizedBox(height: 18,),
               
               //=====================================CREATE TASK BTN AND PRIORITY SECTION
               Row(
@@ -160,7 +193,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   MyButton(label: "Create Task", onTap: _validateData)
                   
                 ],
-              )
+              ),
+              const SizedBox(height: 12,)
             ],
           ),
         )
@@ -169,7 +203,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   //=====================================ADD TASK TO DB
-  _addTaskToDb()async{
+  Future<int> _addTaskToDb()async{
     var value = await _taskController.addTask(
       task:Task(
         title: _titleController.text,
@@ -183,22 +217,101 @@ class _AddTaskPageState extends State<AddTaskPage> {
         isCompleted: 0,
       ) 
     );
-    //var value = await DBHelper.deleteTable();
-    //var value = await DBHelper.showTables();
-    print('inserted data id is: $value');
+    return value;
   }
   //=====================================INPUT VALIDATOR
-  _validateData(){
+  _validateData()async{
      if(_titleController.text.isNotEmpty && _noteController.text.isNotEmpty){
-       _addTaskToDb();
-       Get.back();
+       var value = await _addTaskToDb();
+       await _taskController.getTasksById(value);
+       final task = _taskController.particularTaskList[0];
+       if(value>0){
+         // print('date is $_selectedDate');
+         // print('time is $_startTime');
+         //============================date conversion for notification
+         DateTime dateTime = DateTime.parse(_selectedDate.toString());
+         int day = dateTime.day;
+         int month = dateTime.month;
+         int year = dateTime.year;
+         int weekday = dateTime.weekday;
+
+         //===================================time conversion for notification
+         DateTime time = DateFormat.jm().parse(_startTime.toString());
+         var myTime = DateFormat("HH:mm a").format(time);
+         int hour = int.parse(myTime.toString().split(":")[0]); // 12
+         int minute = int.parse(myTime.toString().split(":")[1].split(" ")[0]); //
+         // String amPm = myTime.toString().split(":")[1].split(" ")[1];
+         //============================handling the time========================
+         int? playHour;
+         int? playMinute;
+         if(minute>_selectedRemind){
+           //15:25 =>(minute-remind)25-5= minute 20
+           playHour = hour;
+           playMinute = minute-_selectedRemind;
+         }
+         else{
+           //15:03 => (hour-1)15-1=hour 14 && (remind-minute)=2 && (60-2)
+           playHour = hour-1;
+           int minusMinute = _selectedRemind - minute;
+           playMinute = minusMinute!=0 ? 60-minusMinute : 0;
+         }
+         
+         //=================================NOTIFICATION CREATION BASED ON REPEAT
+         if(_selectedWantReminder=="Yes"){
+           if(_selectedRepeat!="None"){
+             if(_selectedRepeat=="Daily"){
+               //================================DAILY NOTIFICATION
+              // print('daily notification time is $playHour : $playMinute');
+               NotificationCreationMethod.raiseScheduledNotification(
+                 task: task ,
+                 minute:playMinute ,
+                 hour:playHour,
+               );
+             }
+             else if(_selectedRepeat=="Weekly"){
+               //==================================WEEKLY NOTIFICATION
+              // print('weekly notification week is $weekday');
+               NotificationCreationMethod.raiseScheduledNotification(
+                   task: task,
+                   weekDay: weekday,
+                   isRepeat: false
+               );
+             }else if(_selectedRepeat=="Monthly"){
+               //==================================MONTHLY NOTIFICATION
+              // print('monthly notification date is $day');
+               NotificationCreationMethod.raiseScheduledNotification(
+                   task: task,
+                   day: day,
+                   isRepeat: false
+               );
+             }
+           }else{
+             //=================================NOTIFICATIOIN FOR SPACIFIC DATE
+             //print('exact notification date is  $day:$month:$year');
+             NotificationCreationMethod.raiseScheduledNotification(
+                 task: task,
+                 day: day,
+                 month: month,
+                 year: year,
+                 hour: playHour,
+                 minute: playMinute,
+                 isRepeat: false
+             );
+           }
+         }
+        // print('inserted data id is: $task');
+         Get.back();
+       }else{
+        // print('data not inserted');
+         Get.showSnackbar(const GetSnackBar(title: 'something went wrong while adding new task',));
+       }
      }else if(_titleController.text.isEmpty || _noteController.text.isEmpty){
        Get.snackbar(
            'Required', 
            "all fields are required",
          snackPosition: SnackPosition.BOTTOM,
          backgroundColor: Colors.white,
-         icon: Icon(Icons.warning_amber_rounded,color: Colors.red,),
+         icon: const Icon(Icons.warning_amber_rounded,color: Colors.red,),
          colorText: pinkClr
        );
      }
@@ -209,7 +322,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Color',style: titleStyle,),
-        SizedBox(height: 8,),
+        const SizedBox(height: 8,),
         //===========================COLOR SELECTOR
         Wrap(
             children: List<Widget>.generate(
@@ -222,12 +335,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
                       });
                     },
                     child:  Padding(
-                      padding: EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.only(right: 8),
                       child: CircleAvatar(
                         radius: 14,
                         backgroundColor: index==0?primaryColor : index==1 ? pinkClr : yellowClr,
                         child: _selectedColorIndex==index
-                            ? Icon(Icons.done,color: Colors.white,size: 16,)
+                            ? const Icon(Icons.done,color: Colors.white,size: 16,)
                             :Container(),
                       ),
                     ),
@@ -246,7 +359,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
         onTap: () {
           Get.back();
         },
-        child: Icon(
+        child: const Icon(
           Icons.arrow_back_ios,
           size: 20,
         ),
@@ -254,8 +367,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
       backgroundColor: context.theme.backgroundColor,
       actions: [
         Container(
-          margin: EdgeInsets.only(right: 15),
-          child: CircleAvatar(
+          margin: const EdgeInsets.only(right: 15),
+          child: const CircleAvatar(
             backgroundImage: AssetImage('assets/images/profile.jpg'),
           ),
         )
@@ -283,7 +396,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
     TimeOfDay pickedTime = await _showTimePicker();
     String _formatedTime = pickedTime.format(context);
     if(pickedTime==null){
-      print('time cancelled');
+     // print('time cancelled');
     }else if(isStartTime==true){
       setState(() {
         _startTime=_formatedTime;

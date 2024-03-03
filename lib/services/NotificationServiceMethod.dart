@@ -6,14 +6,14 @@ class NotificationServiceMethod{
   //=============================================ACTION RECIEVED METHOD
   @pragma("vm:entry-point")
   static Future <void> onActionReceivedMethod(ReceivedAction receivedAction) async {
-    print('on action recieve method called');
-    print('Button Key: ${receivedAction.buttonKeyPressed}');
+   // print('on action recieve method called');
+    //print('Button Key: ${receivedAction.buttonKeyPressed}');
     if (receivedAction.buttonKeyPressed == 'view_task') {
-      print('view task called');
+      //print('view task called');
       var task_info = receivedAction.payload;
       Get.to(NotifyPage(task_info: task_info));
     }else if(receivedAction.buttonKeyPressed == 'theme_changed'){
-      print('theme changed called');
+      //print('theme changed called');
     }
   }
   

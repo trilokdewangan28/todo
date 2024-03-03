@@ -1,5 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/material.dart';
+
 class LocalNotification{
  static final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   static Future init()async{ 
@@ -8,7 +8,7 @@ class LocalNotification{
     AndroidInitializationSettings('appicon');
     
     
-    final InitializationSettings initializationSettings = InitializationSettings(
+    const  InitializationSettings initializationSettings =  InitializationSettings(
         android: initializationSettingsAndroid,
     );
 
@@ -19,7 +19,7 @@ class LocalNotification{
   
   //====================show a simple notification
   static Future showSimpleNotification({required String title, required String body, required String payload})async{
-    print('simple notification called');
+    //print('simple notification called');
     const AndroidNotificationDetails androidNotificationDetails =
     AndroidNotificationDetails('your channel id', 'your channel name',
         channelDescription: 'your channel description',

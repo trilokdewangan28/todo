@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+
 import 'package:todo/ui/Themes.dart';
 class MyButton extends StatelessWidget {
   final String label;
@@ -20,7 +20,7 @@ class MyButton extends StatelessWidget {
         child: Center(
           child: Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
                 color: Colors.white
             ),
           ),

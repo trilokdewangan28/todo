@@ -1,13 +1,10 @@
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:get/get.dart';
-import 'package:todo/models/task.dart';
+
 import 'package:todo/services/NotificationServiceMethod.dart';
-import 'package:todo/ui/notify_page.dart';
+
 
 class NotificationServices{
   //=============================================REQUEST NOTIFICATION PERMISSION
