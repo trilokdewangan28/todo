@@ -1,25 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:todo/db/db_helper.dart';
-import 'package:todo/services/LocalNotification.dart';
 import 'package:todo/services/NotificationServices.dart';
 import 'package:todo/services/ThemeServices.dart';
 import 'package:todo/ui/HomePage.dart';
 import 'package:todo/ui/Themes.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await DBHelper.initDb();
   NotificationServices.initialiszeNotification();
   NotificationServices.requestNotificationPermission();
-
-  //tz.initializeTimeZones();
-  //final String timeZoneName = await FlutterNativeTimezone.getLocalTimezone();
-  //tz.setLocalLocation(tz.getLocation(timeZoneName));
-  //runApp(const MyApp());
+  
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

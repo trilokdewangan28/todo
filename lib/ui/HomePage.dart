@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:todo/controllers/task_controller.dart';
 import 'package:todo/models/task.dart';
+import 'package:todo/services/NotificationCreationMethod.dart';
 import 'package:todo/services/NotificationServices.dart';
 import 'package:todo/services/ThemeServices.dart';
 import 'package:todo/ui/AddTaskPage.dart';
@@ -77,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                         playMinute = minusMinute!=0 ? 60-minusMinute : 0;
                       }
                       print('notification time is $playHour : $playMinute');
-                      NotificationServices.raiseScheduledNotificationDateAndTime(
+                      NotificationCreationMethod.raiseScheduledNotificationDateAndTime(
                           task: task,
                           minute:playMinute ,
                           hour:playHour,
@@ -295,7 +296,7 @@ class _HomePageState extends State<HomePage> {
       leading: GestureDetector(
         onTap: () {
           ThemeServices().switchTheme();
-          NotificationServices.raiseSimpleNotification(
+          NotificationCreationMethod.raiseSimpleNotification(
               title: "Changed theme",
               body: Get.isDarkMode
                   ? "Light Theme Activated"

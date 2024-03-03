@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 class NotifyPage extends StatelessWidget {
-  final String label;
-  const NotifyPage({super.key, required this.label});
+  final  task_info;
+  const NotifyPage({super.key, required this.task_info});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class NotifyPage extends StatelessWidget {
           icon: Icon(Icons.arrow_back_ios),
           color: Get.isDarkMode? Colors.white :Colors.grey,
         ),
-        title: Text('passed label String'),
+        title: Text(task_info['task_title']),
       ),
       body: Center(
         child: Container(
@@ -28,7 +28,7 @@ class NotifyPage extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              'passed body String',
+              task_info['task_note'],
               style: TextStyle(
                   color: Get.isDarkMode ? Colors.black : Colors.white,
                 fontSize: 30
