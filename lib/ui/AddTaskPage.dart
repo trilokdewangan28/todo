@@ -369,7 +369,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
         Container(
           margin: const EdgeInsets.only(right: 15),
           child: const CircleAvatar(
-            backgroundImage: AssetImage('assets/images/profile.jpg'),
+            backgroundImage: AssetImage('assets/images/profile.png'),
           ),
         )
       ],

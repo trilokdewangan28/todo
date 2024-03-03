@@ -20,7 +20,7 @@ class NotificationServices{
   static ReceivedAction? initialAction;
   static initialiszeNotification()async{
     await AwesomeNotifications().initialize(
-        'resource://drawable/appicon',
+        'resource://drawable/ic_launcher',
         [
           NotificationChannel(
               channelGroupKey: "test_channel_group",             // optional 

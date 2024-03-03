@@ -7,12 +7,10 @@ import 'package:intl/intl.dart';
 import 'package:todo/controllers/task_controller.dart';
 import 'package:todo/models/task.dart';
 import 'package:todo/services/NotificationCreationMethod.dart';
-
 import 'package:todo/services/ThemeServices.dart';
 import 'package:todo/ui/AddTaskPage.dart';
 import 'package:todo/ui/Themes.dart';
 import 'package:todo/ui/widgets/button.dart';
-
 import 'widgets/task_tile.dart';
 
 class HomePage extends StatefulWidget {
@@ -338,7 +336,7 @@ class _HomePageState extends State<HomePage> {
         Container(
           margin: const EdgeInsets.only(right: 15),
           child: const CircleAvatar(
-            backgroundImage: AssetImage('assets/images/profile.jpg'),
+            backgroundImage: AssetImage('assets/images/profile.png'),
           ),
         )
       ],
